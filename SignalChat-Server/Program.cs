@@ -50,6 +50,7 @@ namespace SignalChat_Server
                  };
              });
             builder.Services.AddAuthorization();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddSignalR();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
