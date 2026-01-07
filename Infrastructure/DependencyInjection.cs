@@ -1,7 +1,9 @@
-﻿using Application.Common.Interfaces.Channels;
+﻿using Application.Common.Interfaces.ChannelMembers;
+using Application.Common.Interfaces.Channels;
 using Application.Common.Interfaces.Security;
 using Application.Common.Interfaces.Users;
 using Infrastructure.Cryptography;
+using Infrastructure.Services.ChannelMembers;
 using Infrastructure.Services.Channels;
 using Infrastructure.Services.Security;
 using Infrastructure.Services.Users;
@@ -20,7 +22,9 @@ namespace Infrastructure
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IAuthUser, AuthUserService>();
             services.AddScoped<IJWTService, JWTService>();
+            services.AddScoped<IChannelMember, ChannelMemberService>();
             services.AddScoped<IChannelService, ChannelService>();
+
             return services;
         }
     }

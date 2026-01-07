@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces.Channels;
+﻿using Application.Common.Interfaces.ChannelMembers;
+using Application.Common.Interfaces.Channels;
 using Application.DTOs.Channels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -13,15 +14,18 @@ namespace SignalChat_Server.Controllers
     public class ChannelsController : ControllerBase
     {
         private readonly IChannelService _service;
+        private readonly IChannelMember _channelMembers;
         private readonly ILogger<ChannelsController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ChannelsController(IChannelService service,
             ILogger<ChannelsController> logger,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IChannelMember channelMembers)
         {
             _service = service;
             _logger = logger;
+            _channelMembers = channelMembers;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -31,12 +35,24 @@ namespace SignalChat_Server.Controllers
             var result = await _service.CreateChannelAsync(dto);
             return Ok(result);
         }
+        [HttpPost("join/{channelId}")]
+        public async Task<IActionResult> JoinUserToGroup([FromRoute] Guid channelId)
+        {
+            var user = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var channel = await _service.GetChannelAsync(channelId);
 
+            if (channel is null) { NotFound("Channel has not been found it"); }
+
+            Guid.TryParse(user, out Guid userId);
+
+            await _channelMembers.JoinToChannel(userId, channelId);
+            return Ok();
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
             var channel = await _service.GetChannelAsync(id);
-            return channel == null ? NotFound() : Ok(channel);
+            return channel is null ? NotFound() : Ok(channel);
         }
 
         [HttpGet]
