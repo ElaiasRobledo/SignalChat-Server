@@ -4,6 +4,7 @@ using Application.DTOs.Channels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SignalChat_Server.Hubs;
 using System.Security.Claims;
 
 namespace SignalChat_Server.Controllers
@@ -14,6 +15,7 @@ namespace SignalChat_Server.Controllers
     public class ChannelsController : ControllerBase
     {
         private readonly IChannelService _service;
+        private readonly ChatHub _hub;
         private readonly IChannelMember _channelMembers;
         private readonly ILogger<ChannelsController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -21,7 +23,8 @@ namespace SignalChat_Server.Controllers
         public ChannelsController(IChannelService service,
             ILogger<ChannelsController> logger,
             IHttpContextAccessor httpContextAccessor,
-            IChannelMember channelMembers)
+            IChannelMember channelMembers
+            )
         {
             _service = service;
             _logger = logger;
@@ -38,15 +41,21 @@ namespace SignalChat_Server.Controllers
         [HttpPost("join/{channelId}")]
         public async Task<IActionResult> JoinUserToGroup([FromRoute] Guid channelId)
         {
-            var user = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var channel = await _service.GetChannelAsync(channelId);
+            try
+            {
+                var user = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                var channel = await _service.GetChannelAsync(channelId);
 
-            if (channel is null) { NotFound("Channel has not been found it"); }
+                if (channel is null) { NotFound("Channel has not been found it"); }
 
-            Guid.TryParse(user, out Guid userId);
+                Guid.TryParse(user, out Guid userId);
 
-            await _channelMembers.JoinToChannel(userId, channelId);
-            return Ok();
+                await _channelMembers.JoinToChannel(userId, channelId);
+                return Ok();
+            }catch(Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
