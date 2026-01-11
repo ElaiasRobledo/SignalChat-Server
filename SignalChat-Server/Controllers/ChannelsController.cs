@@ -4,6 +4,7 @@ using Application.DTOs.Channels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using SignalChat_Server.Hubs;
 using System.Security.Claims;
 
@@ -15,13 +16,14 @@ namespace SignalChat_Server.Controllers
     public class ChannelsController : ControllerBase
     {
         private readonly IChannelService _service;
-        private readonly ChatHub _hub;
+        private readonly IHubContext<ChatHub> _hub;
         private readonly IChannelMember _channelMembers;
         private readonly ILogger<ChannelsController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ChannelsController(IChannelService service,
             ILogger<ChannelsController> logger,
+            IHubContext<ChatHub> hub,
             IHttpContextAccessor httpContextAccessor,
             IChannelMember channelMembers
             )
@@ -29,6 +31,7 @@ namespace SignalChat_Server.Controllers
             _service = service;
             _logger = logger;
             _channelMembers = channelMembers;
+            _hub = hub;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -38,25 +41,34 @@ namespace SignalChat_Server.Controllers
             var result = await _service.CreateChannelAsync(dto);
             return Ok(result);
         }
+
         [HttpPost("join/{channelId}")]
         public async Task<IActionResult> JoinUserToGroup([FromRoute] Guid channelId)
         {
             try
             {
                 var user = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-                var channel = await _service.GetChannelAsync(channelId);
 
+                var connectionId = Request.Headers["X-ConnectionId"].ToString();
+                if (string.IsNullOrEmpty(connectionId)) return BadRequest("Missing connectionId");
+
+                var channel = await _service.GetChannelAsync(channelId);
                 if (channel is null) { NotFound("Channel has not been found it"); }
 
                 Guid.TryParse(user, out Guid userId);
-
                 await _channelMembers.JoinToChannel(userId, channelId);
+
+                await _hub.Groups.AddToGroupAsync(connectionId, channelId.ToString());
+                await _hub.Clients.Groups(channelId.ToString()).SendAsync("ReceiveMessage", $"Welcome {User.Identity?.Name}");
+
                 return Ok();
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Conflict(ex.Message);
             }
         }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
@@ -83,7 +95,5 @@ namespace SignalChat_Server.Controllers
             bool ok = await _service.DeleteChannelAsync(id);
             return ok ? NoContent() : NotFound();
         }
-
     }
-
 }

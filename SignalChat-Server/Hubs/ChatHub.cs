@@ -22,24 +22,29 @@ namespace SignalChat_Server.Hubs
                 await Groups.AddToGroupAsync(Context.ConnectionId, channel.ChannelId.ToString());
             }
             await base.OnConnectedAsync();
+            Console.WriteLine($"ConnectionId: {Context.ConnectionId}");
+
         }
 
         public async Task SendMessageToAllClients(string user, string message)
         => await Clients.All.SendAsync("ReceiveMessage", user, message);
         public async Task SendMessageToSpecificClient(string targetUserId, string message)
         => await Clients.User(targetUserId).SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
-        
-        
-        public async Task AddToGroup(string groupName)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-            await Clients.Group(groupName).SendAsync("Send", $"{Context.User.Identity.Name} has joined the group {groupName}.");
-
-        }
 
         public async Task SendMessageToGroup(Guid channelId,string message)
         => await Clients.Group(channelId.ToString()).SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
 
+        public async Task WelcomeMessageToGroup(string connectionId, Guid channelId)
+        {
+
+            await Groups.AddToGroupAsync(connectionId, channelId.ToString());
+            await Clients.Group(channelId.ToString()).SendAsync("ReceiveMessage", $"Welcome {Context.User.Identity.Name}");
+
+        }
+        public async Task<string> GetConnectionId()
+        {
+            return Context.ConnectionId;
+        }
 
 
 

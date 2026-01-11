@@ -47,10 +47,6 @@ namespace Infrastructure.Services.ChannelMembers
         {
 
             var entities = await _appDbContext.ChannelMembers.Where(c => c.UserId == userId).ToListAsync();
-
-            if (!entities.Any())
-                throw new InvalidOperationException("The user is not registered in any group");
-
             return entities.Adapt<IEnumerable<GetChannelsMembersDto>>();
         }
     }
