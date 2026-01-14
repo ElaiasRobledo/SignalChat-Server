@@ -1,0 +1,17 @@
+﻿using Application.DTOs.Contacts;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Application.Common.Interfaces.Contacts
+{
+    public interface IContactsService
+    {
+        Task AddAsync(Guid ownerId, string userName);
+        Task<IEnumerable<ResponseContactDto>> GetApprovedAsync(Guid approverId);
+        Task<IEnumerable<ResponseContactDto>> GetPendingAsync(Guid approverId);
+        Task ApproveAsync(Guid requesterId, Guid approverId);
+        Task RejectAsync(Guid requesterId, Guid approverId);
+
+    }
+}
