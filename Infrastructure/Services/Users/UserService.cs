@@ -1,5 +1,7 @@
 ﻿using Application.Common.Interfaces.Users;
+using Application.DTOs.Contacts;
 using Domain.Entities;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -29,6 +31,14 @@ namespace Infrastructure.Services.Users
             if (result is null) { throw new KeyNotFoundException("User not found"); }
 
             return result;
+        }
+        public async Task<ResponseContactDto> GetByUsernameAsync(string userName)
+        {
+            var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Username == userName);
+            if (user is null) { throw new KeyNotFoundException("User not found"); }
+            var result = new ResponseContactDto { Username = userName, UserId = user.Id };
+            return result;
+        
         }
     }
 }

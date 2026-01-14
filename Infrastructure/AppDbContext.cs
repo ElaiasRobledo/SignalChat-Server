@@ -17,7 +17,7 @@ namespace Infrastructure
             modelBuilder.Entity<ChannelMember>()
                 .HasKey(cm => new { cm.ChannelId, cm.UserId });
             modelBuilder.Entity<Contact>()
-                .HasKey(cm => new { cm.OwnerUserId, cm.ContactUserId });
+                .HasKey(cm => new { cm.RequesterId, cm.AddresseeId });
 
             base.OnModelCreating(modelBuilder);
         }

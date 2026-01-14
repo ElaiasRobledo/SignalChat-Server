@@ -86,7 +86,6 @@ namespace Infrastructure.Services.Channels
                 return false;
             }
 
-            // update fields
             var nameField = typeof(Channel)
                 .GetProperty("Name", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
