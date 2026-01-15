@@ -14,7 +14,7 @@ using static Domain.Entities.Contact;
 
 namespace Infrastructure.Services.Contacts
 {
-    public class ContactsService : IContactsService
+    internal class ContactsService : IContactsService
     {
         private readonly AppDbContext _appDbContext;
         private readonly ILogger<ContactsService> _logger;

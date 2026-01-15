@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Infrastructure.Services.ChannelMembers
 {
-    public class ChannelMemberService : IChannelMember
+    internal class ChannelMemberService : IChannelMember
     {
         private readonly AppDbContext _appDbContext;
         private readonly ILogger<ChannelMemberService> _logger;

@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Infrastructure.Services.Channels
 {
-    public class ChannelService : IChannelService
+    internal class ChannelService : IChannelService
     {
         private readonly AppDbContext _db;
         private readonly ILogger<ChannelService> _logger;

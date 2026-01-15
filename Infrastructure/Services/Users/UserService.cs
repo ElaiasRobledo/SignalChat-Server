@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Infrastructure.Services.Users
 {
-    public class UserService : IUserService
+    internal class UserService : IUserService
     {
         private readonly AppDbContext _appDbContext;
 

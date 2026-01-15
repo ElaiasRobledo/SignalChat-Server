@@ -10,7 +10,7 @@ using static Application.DTOs.Users.AuthUserDto;
 
 namespace Infrastructure.Services.Users
 {
-    public class AuthUserService : IAuthUser
+    internal class AuthUserService : IAuthUser
     {
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJWTService _jwtService;
