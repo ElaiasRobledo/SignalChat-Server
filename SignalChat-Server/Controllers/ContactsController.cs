@@ -33,13 +33,22 @@ namespace SignalChat_Server.Controllers
             await _contactsService.AddAsync(_currentUserService.UserId, request.username);
             return Ok("Request sent correctly");
         }
-        [HttpPut("{Id}")]
+        [HttpPut("approve/{Id}")]
         public async Task<IActionResult> Approve([FromRoute] string Id)
         {
             if (string.IsNullOrWhiteSpace(Id)) return BadRequest("Incorrect id");
             Guid.TryParse(Id, out Guid requesterId);
             await _contactsService.ApproveAsync(requesterId, _currentUserService.UserId);
-            return Ok("Contect added correctly");
+            return Ok("Contact added correctly");
+
+        }
+        [HttpPut("reject/{Id}")]
+        public async Task<IActionResult> Reject([FromRoute] string Id)
+        {
+            if (string.IsNullOrWhiteSpace(Id)) return BadRequest("Incorrect id");
+            Guid.TryParse(Id, out Guid requesterId);
+            await _contactsService.RejectAsync(requesterId, _currentUserService.UserId);
+            return Ok("Contect rejected correctly");
 
         }
         [HttpGet("approved")]
