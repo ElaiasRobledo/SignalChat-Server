@@ -11,6 +11,6 @@ namespace Application.Common.Interfaces.Users
         Task<string> GetUsername(string id);
         Task<User> GetByIdAsync(string id);
         Task<ResponseContactDto> GetByUsernameAsync(string userName);
-        Task<IEnumerable<ResponseContactDto>> GetAllAsync(string username);
+        Task<IEnumerable<ResponseContactDto>> GetAllAsync(Guid ownerId,string username);
     }
 }

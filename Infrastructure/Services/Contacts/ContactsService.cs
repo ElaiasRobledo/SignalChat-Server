@@ -26,6 +26,7 @@ namespace Infrastructure.Services.Contacts
             _logger = logger;
             _usersService = usersService;
         }
+
         public async Task<AddContactResult> AddAsync(Guid ownerId, string userName)
         {
             var targetUser = await _usersService.GetByUsernameAsync(userName);
@@ -47,24 +48,23 @@ namespace Infrastructure.Services.Contacts
                 };
             }
 
+            if (targetUser.UserId == ownerId) throw new InvalidOperationException("You cant add yourself");
 
-        
-                 var newContact = new Contact(ownerId, ownUsername, targetUser.UserId, targetUser.Username);
+            var newContact = new Contact(ownerId, ownUsername, targetUser.UserId, targetUser.Username);
 
-                try
-                {
-                    await _appDbContext.Contacts.AddAsync(newContact);
-                    await _appDbContext.SaveChangesAsync();
-                    _logger.LogInformation($"The new contact '{userName}' was added correctly");
+            try
+            {
+                await _appDbContext.Contacts.AddAsync(newContact);
+                await _appDbContext.SaveChangesAsync();
+                _logger.LogInformation($"The new contact '{userName}' was added correctly");
                 return AddContactResult.Success;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"'ContactsService' | 'AddAsync'| Error creating the new contact: {ex.Message} ");
-                    throw new Exception($"Error creating the contact: {ex.Message}");
-                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"'ContactsService' | 'AddAsync'| Error creating the new contact: {ex.Message} ");
+                throw new Exception($"Error creating the contact: {ex.Message}");
+            }
         }
-        
 
         public async Task<IEnumerable<ResponseContactDto>> GetApprovedAsync(Guid userId)
         {
@@ -109,14 +109,12 @@ namespace Infrastructure.Services.Contacts
             });
 
             return result;
-      
         }
 
         public async Task ApproveAsync(Guid requesterId, Guid approverId)
         {
             try
             {
-
                 var request = await _appDbContext.Contacts
                    .FirstOrDefaultAsync(c =>
                        c.RequesterId == requesterId &&
@@ -134,7 +132,6 @@ namespace Infrastructure.Services.Contacts
                 throw new Exception($"'ApproveAsync' | Error updating the status of the request: {ex.Message}");
             }
         }
-        
 
         public async Task RejectAsync(Guid requesterId, Guid approverId)
         {
