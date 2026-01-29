@@ -30,8 +30,28 @@ namespace SignalChat_Server.Controllers
         public async Task<IActionResult> AddNewContact([FromBody] AddContactDto request)
         {
             if (string.IsNullOrEmpty(request.username)) return BadRequest("User name is required");
-            await _contactsService.AddAsync(_currentUserService.UserId, request.username);
-            return Ok("Request sent correctly");
+            var result = await _contactsService.AddAsync(_currentUserService.UserId, request.username);
+
+            return result switch
+            {
+                AddContactResult.Success =>
+                Ok("Request sent correctly"),
+
+                AddContactResult.AlreadyContacts =>
+                    Conflict("Users are already contacts."),
+
+                AddContactResult.PendingRequestExists =>
+                    Conflict("A request already exists."),
+
+                AddContactResult.RequestRejected =>
+                    Conflict("The request has already been rejected."),
+
+                AddContactResult.TargetUserNotFound =>
+                    NotFound("User not found."),
+
+                _ => StatusCode(500)
+            };
+            
         }
         [HttpPut("approve/{Id}")]
         public async Task<IActionResult> Approve([FromRoute] string Id)

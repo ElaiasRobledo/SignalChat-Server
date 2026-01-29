@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces.Security;
 using Application.Common.Interfaces.Users;
+using Application.Exceptions;
 using Domain.Entities;
 using Infrastructure.Cryptography;
 using Microsoft.EntityFrameworkCore;
@@ -25,12 +26,13 @@ namespace Infrastructure.Services.Users
         public async Task AddUserAsync(RegisterUserDto payload)
         {
 
-            var email = await _appDbContext.
+            var username = await _appDbContext.
                 Users.
                 FirstOrDefaultAsync
                 (c => c.Username == payload.username);
 
-            if (email is not null) { throw new Exception("Usuario ya registrado"); }
+            if (username is not null)
+                throw new UserAlreadyExistsException();
 
             var passwordHash = _passwordHasher.Hash(payload.password);
             var user = new User(payload.username, passwordHash);
@@ -42,17 +44,19 @@ namespace Infrastructure.Services.Users
         {
             var user = await _appDbContext.Users.SingleOrDefaultAsync
                 (u => u.Username == payload.username);
+            
             if (user is null) 
-                throw new UnauthorizedAccessException("Invalid credentials");
+                throw new InvalidCredentialsException();
 
 
             var password = _passwordHasher.Verify(user.PasswordHash, payload.password);
             if (!password)
-                throw new UnauthorizedAccessException("Invalid credentials");
+                throw new InvalidCredentialsException();
 
             return _jwtService.GenerateToken(user);
 
 
         }
+
     }
 }

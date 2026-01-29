@@ -26,8 +26,7 @@ namespace Infrastructure.Services.Contacts
             _logger = logger;
             _usersService = usersService;
         }
-
-        public async Task AddAsync(Guid ownerId, string userName)
+        public async Task<AddContactResult> AddAsync(Guid ownerId, string userName)
         {
             var targetUser = await _usersService.GetByUsernameAsync(userName);
             var ownUsername = await _usersService.GetUsername(ownerId.ToString());
@@ -39,26 +38,25 @@ namespace Infrastructure.Services.Contacts
 
             if (existing != null)
             {
-                switch (existing.status)
+                return existing.status switch
                 {
-                    case Status.Accepted:
-                        throw new InvalidOperationException("Users are already contacts.");
-
-                    case Status.Pending:
-                        throw new InvalidOperationException("A request already exists.");
-
-                    case Status.Rejected:
-                        throw new InvalidOperationException("The request has already been rejected.");
-                }
-
+                    Status.Accepted => AddContactResult.AlreadyContacts,
+                    Status.Pending => AddContactResult.PendingRequestExists,
+                    Status.Rejected => AddContactResult.RequestRejected,
+                    _ => throw new InvalidOperationException("Invalid contact state")
+                };
             }
-                var newContact = new Contact(ownerId, ownUsername, targetUser.UserId, targetUser.Username);
+
+
+        
+                 var newContact = new Contact(ownerId, ownUsername, targetUser.UserId, targetUser.Username);
 
                 try
                 {
                     await _appDbContext.Contacts.AddAsync(newContact);
                     await _appDbContext.SaveChangesAsync();
                     _logger.LogInformation($"The new contact '{userName}' was added correctly");
+                return AddContactResult.Success;
                 }
                 catch (Exception ex)
                 {
@@ -66,7 +64,7 @@ namespace Infrastructure.Services.Contacts
                     throw new Exception($"Error creating the contact: {ex.Message}");
                 }
         }
-
+        
 
         public async Task<IEnumerable<ResponseContactDto>> GetApprovedAsync(Guid userId)
         {
