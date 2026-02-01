@@ -9,4 +9,9 @@ namespace Application.Exceptions
         public InvalidCredentialsException()
             : base("Invalid credentials") { }
     }
+    public sealed class UserNotFoundException : Exception
+    {
+        public UserNotFoundException()
+            : base("User not found") { }
+    }
 }
