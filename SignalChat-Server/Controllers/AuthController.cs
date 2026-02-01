@@ -49,6 +49,11 @@ namespace SignalChat_Server.Controllers
                 _logger.LogWarning($"Login user: {ex.Message}");
                 return Unauthorized(new { message = ex.Message});
             }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning($"Login user: {ex.Message}");
+                return Unauthorized(new { message = ex.Message });
+            }
 
         }
     }

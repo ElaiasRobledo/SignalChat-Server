@@ -46,7 +46,7 @@ namespace Infrastructure.Services.Users
                 (u => u.Username == payload.username);
             
             if (user is null) 
-                throw new InvalidCredentialsException();
+                throw new UserNotFoundException();
 
 
             var password = _passwordHasher.Verify(user.PasswordHash, payload.password);

@@ -12,6 +12,6 @@ namespace Application.Common.Interfaces.Contacts
         Task<IEnumerable<ResponseContactDto>> GetPendingAsync(Guid approverId);
         Task ApproveAsync(Guid requesterId, Guid approverId);
         Task RejectAsync(Guid requesterId, Guid approverId);
-
+        Task DeleteAsync(Guid contactId);
     }
 }

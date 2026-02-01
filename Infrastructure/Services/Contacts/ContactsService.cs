@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces.Contacts;
 using Application.Common.Interfaces.Users;
 using Application.DTOs.Contacts;
+using Application.Exceptions;
 using Domain.Entities;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,14 @@ namespace Infrastructure.Services.Contacts
                 _logger.LogError($"'ContactsService' | 'AddAsync'| Error creating the new contact: {ex.Message} ");
                 throw new Exception($"Error creating the contact: {ex.Message}");
             }
+        }
+        public async Task DeleteAsync (Guid contactId)
+        {
+            var contact = await _appDbContext.Contacts.FirstOrDefaultAsync(c => c.AddresseeId == contactId);
+            if (contact is null) throw new UserNotFoundException();
+
+            _appDbContext.Contacts.Remove(contact);
+            await _appDbContext.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<ResponseContactDto>> GetApprovedAsync(Guid userId)

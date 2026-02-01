@@ -51,7 +51,7 @@ namespace SignalChat_Server.Controllers
 
                 _ => StatusCode(500)
             };
-            
+
         }
         [HttpPut("approve/{Id}")]
         public async Task<IActionResult> Approve([FromRoute] string Id)
@@ -84,6 +84,17 @@ namespace SignalChat_Server.Controllers
             if (_currentUserService.UserId == Guid.Empty) return Unauthorized();
             var response = await _contactsService.GetPendingAsync(_currentUserService.UserId);
             return Ok(response);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteContact([FromRoute] string id)
+        {
+            if (_currentUserService.UserId == Guid.Empty) return Unauthorized();
+            if (string.IsNullOrWhiteSpace(id)) return BadRequest("Incorrect id");
+            
+            Guid.TryParse(id, out Guid contactId);
+
+            await _contactsService.DeleteAsync(contactId);
+            return NoContent();
         }
     }
 }
