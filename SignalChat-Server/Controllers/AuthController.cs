@@ -1,5 +1,7 @@
 ﻿using Application.Common.Interfaces.Users;
+using Application.Exceptions;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Authentication;
 using static Application.DTOs.Users.AuthUserDto;
 
 namespace SignalChat_Server.Controllers
@@ -25,7 +27,7 @@ namespace SignalChat_Server.Controllers
                 _logger.LogInformation("User created");
                 return Created();
             }
-            catch (Exception ex)
+            catch (UserAlreadyExistsException ex)
             {
                 _logger.LogError($"Register user: {ex.Message}");
                 return BadRequest(ex.Message);
@@ -42,10 +44,15 @@ namespace SignalChat_Server.Controllers
                 _logger.LogInformation("User loged");
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (InvalidCredentialsException ex)
             {
-                _logger.LogError($"Login user: {ex.Message}");
-                return BadRequest(ex.Message);
+                _logger.LogWarning($"Login user: {ex.Message}");
+                return Unauthorized(new { message = ex.Message});
+            }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning($"Login user: {ex.Message}");
+                return Unauthorized(new { message = ex.Message });
             }
 
         }

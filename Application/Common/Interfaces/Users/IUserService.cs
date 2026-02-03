@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs.Contacts;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,5 +10,7 @@ namespace Application.Common.Interfaces.Users
     {
         Task<string> GetUsername(string id);
         Task<User> GetByIdAsync(string id);
+        Task<ResponseContactDto> GetByUsernameAsync(string userName);
+        Task<IEnumerable<ResponseContactDto>> GetAllAsync(Guid ownerId,string username);
     }
 }

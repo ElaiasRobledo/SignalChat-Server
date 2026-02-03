@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Infrastructure.Services.Security
 {
-    public class JWTService : IJWTService
+    internal class JWTService : IJWTService
     {
         public string GenerateToken(User user)
         {

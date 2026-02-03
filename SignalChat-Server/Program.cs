@@ -1,9 +1,11 @@
 
+using Application.Common.Interfaces.Utils;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SignalChat_Server.Hubs;
+using SignalChat_Server.Utils;
 using System.Text;
 
 namespace SignalChat_Server
@@ -15,6 +17,8 @@ namespace SignalChat_Server
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+
             builder.Services.AddControllers();
             builder.Services
              .AddAuthentication("Bearer")
@@ -50,9 +54,11 @@ namespace SignalChat_Server
                  };
              });
             builder.Services.AddAuthorization();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddSignalR();
 
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            //DI
+            builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             builder.Services.AddOpenApi();
             builder.Services.AddInfrastructure();
