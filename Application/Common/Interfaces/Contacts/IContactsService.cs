@@ -9,9 +9,11 @@ namespace Application.Common.Interfaces.Contacts
     {
         Task<AddContactResult> AddAsync(Guid ownerId, string userName);
         Task<IEnumerable<ResponseContactDto>> GetApprovedAsync(Guid approverId);
-        Task<IEnumerable<ResponseContactDto>> GetPendingAsync(Guid approverId);
+     //   Task<IEnumerable<ResponseContactDto>> GetPendingAsync(Guid approverId);
         Task ApproveAsync(Guid requesterId, Guid approverId);
         Task RejectAsync(Guid requesterId, Guid approverId);
-        Task DeleteAsync(Guid contactId);
+        Task DeleteAsync(Guid ownerId,Guid contactId);
+        Task<IEnumerable<ResponseContactDto>> OutgoingPendingAsync(Guid userId);
+        Task<IEnumerable<ResponseContactDto>> IncomingPendingAsync(Guid userId);
     }
 }

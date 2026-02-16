@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces.Users;
-using Application.Exceptions;
+using Application.Exceptions.Users;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Authentication;
 using static Application.DTOs.Users.AuthUserDto;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Exceptions
+namespace Application.Exceptions.Users
 {
     public sealed class InvalidCredentialsException : Exception
     {

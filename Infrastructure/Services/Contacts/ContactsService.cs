@@ -2,6 +2,7 @@
 using Application.Common.Interfaces.Users;
 using Application.DTOs.Contacts;
 using Application.Exceptions;
+using Application.Exceptions.Users;
 using Domain.Entities;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -40,13 +41,13 @@ namespace Infrastructure.Services.Contacts
 
             if (existing != null)
             {
-                return existing.status switch
-                {
-                    Status.Accepted => AddContactResult.AlreadyContacts,
-                    Status.Pending => AddContactResult.PendingRequestExists,
-                    Status.Rejected => AddContactResult.RequestRejected,
-                    _ => throw new InvalidOperationException("Invalid contact state")
-                };
+                if (existing.status == Status.Pending)
+                    return AddContactResult.PendingRequestExists;
+
+                if (existing.status == Status.Accepted)
+                    return AddContactResult.AlreadyContacts;
+
+                _appDbContext.Contacts.Remove(existing);
             }
 
             if (targetUser.UserId == ownerId) throw new InvalidOperationException("You cant add yourself");
@@ -66,10 +67,18 @@ namespace Infrastructure.Services.Contacts
                 throw new Exception($"Error creating the contact: {ex.Message}");
             }
         }
-        public async Task DeleteAsync (Guid contactId)
+
+        public async Task DeleteAsync(Guid ownerId, Guid contactId)
         {
-            var contact = await _appDbContext.Contacts.FirstOrDefaultAsync(c => c.AddresseeId == contactId);
+            var contact = await _appDbContext.Contacts
+            .FirstOrDefaultAsync(c =>
+                 (c.RequesterId == ownerId && c.AddresseeId == contactId) ||
+                 (c.RequesterId == contactId && c.AddresseeId == ownerId));
+
             if (contact is null) throw new UserNotFoundException();
+
+            if (contact.status != Status.Accepted)
+                throw new InvalidOperationException("Cannot delete non-accepted contact");
 
             _appDbContext.Contacts.Remove(contact);
             await _appDbContext.SaveChangesAsync();
@@ -122,28 +131,24 @@ namespace Infrastructure.Services.Contacts
 
         public async Task ApproveAsync(Guid requesterId, Guid approverId)
         {
-            try
-            {
-                var request = await _appDbContext.Contacts
-                   .FirstOrDefaultAsync(c =>
-                       c.RequesterId == requesterId &&
-                       c.AddresseeId == approverId &&
-                       c.status == Status.Pending);
+            var request = await _appDbContext.Contacts
+                .FirstOrDefaultAsync(c =>
+                    c.RequesterId == requesterId &&
+                    c.AddresseeId == approverId &&
+                    c.status == Status.Pending);
 
-                if (request is null)
-                    throw new KeyNotFoundException("Request not found");
+            if (request is null)
+                throw new InvalidOperationException("Pending request not found or invalid approver");
 
-                request.Approve();
-                await _appDbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"'ApproveAsync' | Error updating the status of the request: {ex.Message}");
-            }
+            request.Approve();
+            await _appDbContext.SaveChangesAsync();
         }
 
         public async Task RejectAsync(Guid requesterId, Guid approverId)
         {
+            if (requesterId == approverId)
+                throw new InvalidOperationException("You cannot reject your own request");
+
             var request = await _appDbContext.Contacts
                .FirstOrDefaultAsync(c =>
                    c.RequesterId == requesterId &&
@@ -156,5 +161,35 @@ namespace Infrastructure.Services.Contacts
             request.Reject();
             await _appDbContext.SaveChangesAsync();
         }
+        public async Task<IEnumerable<ResponseContactDto>> IncomingPendingAsync(Guid userId)
+        {
+            return await _appDbContext.Contacts
+                .Where(c =>
+                    c.AddresseeId == userId &&
+                    c.status == Status.Pending)
+                .Select(c => new ResponseContactDto
+                {
+                    UserId = c.RequesterId,
+                    Username = c.RequesterUsername,
+                    Status = c.status.ToString()
+                })
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<ResponseContactDto>> OutgoingPendingAsync(Guid userId)
+        {
+            return await _appDbContext.Contacts
+                .Where(c =>
+                    c.RequesterId == userId &&
+                    c.status == Status.Pending)
+                .Select(c => new ResponseContactDto
+                {
+                    UserId = c.AddresseeId,
+                    Username = c.AddresseeUsername,
+                    Status = c.status.ToString()
+                })
+                .ToListAsync();
+        }
+
+
     }
 }

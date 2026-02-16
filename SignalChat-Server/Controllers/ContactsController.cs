@@ -82,7 +82,14 @@ namespace SignalChat_Server.Controllers
         public async Task<IActionResult> GetPending()
         {
             if (_currentUserService.UserId == Guid.Empty) return Unauthorized();
-            var response = await _contactsService.GetPendingAsync(_currentUserService.UserId);
+            var response = await _contactsService.IncomingPendingAsync(_currentUserService.UserId);
+            return Ok(response);
+        }
+        [HttpGet("sent")]
+        public async Task<IActionResult> GetSent()
+        {
+            if (_currentUserService.UserId == Guid.Empty) return Unauthorized();
+            var response = await _contactsService.IncomingPendingAsync(_currentUserService.UserId);
             return Ok(response);
         }
         [HttpDelete("{id}")]
@@ -93,7 +100,7 @@ namespace SignalChat_Server.Controllers
             
             Guid.TryParse(id, out Guid contactId);
 
-            await _contactsService.DeleteAsync(contactId);
+            await _contactsService.DeleteAsync(_currentUserService.UserId,contactId);
             return NoContent();
         }
     }

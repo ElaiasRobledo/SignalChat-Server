@@ -27,7 +27,7 @@ namespace Domain.Entities
             Admin,
             Member
         }
-
+    
     }
 
 }

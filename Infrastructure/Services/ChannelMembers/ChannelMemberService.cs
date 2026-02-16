@@ -1,5 +1,7 @@
 ﻿using Application.Common.Interfaces.ChannelMembers;
 using Application.DTOs.ChannelMembers;
+using Application.Exceptions.ChannelMembers;
+using Application.Exceptions.Channels;
 using Domain.Entities;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -26,13 +28,13 @@ namespace Infrastructure.Services.ChannelMembers
             var userInGroup = await _appDbContext.ChannelMembers.AnyAsync
                 (u => u.UserId == userId && u.ChannelId == channelId);
 
+            var channel = await _appDbContext.Channels.FirstOrDefaultAsync
+                (c => c.Id == channelId);
+            if (channel is null) throw new ChannelNotFoundException();
 
-            if (userInGroup)
-            {
-                throw new InvalidOperationException(
-                    $"User '{userId}' is already a member of channel '{channelId}'."
-                );
-            }
+            if(!channel.IsPublic) throw new ChannelIsPrivateException();
+
+            if (userInGroup) throw new UserIsAlreadyInTheChannelException();
 
             var newUser = new ChannelMember(channelId,userId,ChannelMember.ChannelRole.Member);
             
@@ -42,7 +44,24 @@ namespace Infrastructure.Services.ChannelMembers
             await _appDbContext.SaveChangesAsync();
 
         }
+        public async Task SendRequestToJoinToPrivateChannel(Guid userId, Guid channelId)
+        {
+            var channel = await _appDbContext.Channels.FirstOrDefaultAsync
+                (c => c.Id == channelId);
+            if (channel is null) throw new ChannelNotFoundException();
+           
+            var requestSent = await _appDbContext.RequestToJoinToChannels.AnyAsync
+              (u => u.RequesterId == userId && u.ChannelId == channelId);
 
+            if (requestSent) throw new SentRequestToJoinToChannelException();
+
+            var newRequest = new RequestToJoinToChannel(userId, channelId);
+            _logger.LogInformation($"Creating request for: {userId.ToString()} to channel: {channelId.ToString()}");
+
+            await _appDbContext.RequestToJoinToChannels.AddAsync(newRequest);
+            await _appDbContext.SaveChangesAsync();
+
+        }
         public async Task<IEnumerable<GetChannelsMembersDto>> GetChannelsForUserAsync(Guid userId)
         {
 

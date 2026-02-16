@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces.Security;
 using Application.Common.Interfaces.Users;
 using Application.Exceptions;
+using Application.Exceptions.Users;
 using Domain.Entities;
 using Infrastructure.Cryptography;
 using Microsoft.EntityFrameworkCore;

@@ -7,11 +7,13 @@ namespace Application.Common.Interfaces.Channels
 {
     public interface IChannelService
     {
-        Task<ChannelDto> CreateChannelAsync(ChannelCreateDto dto);
-        Task<ChannelDto> GetChannelAsync(Guid id);
-        Task<bool> DeleteChannelAsync(Guid id);
-        Task<IEnumerable<ChannelDto>> GetAllChannelsAsync();
-        Task<string> GetChannelByName(string name);
-        Task<bool> UpdateChannelAsync(Guid id, ChannelUpdateDto dto);
+        Task<ChannelDto> CreateChannelAsync(ChannelCreateDto dto, Guid ownerId);
+            Task<ChannelDto> GetChannelAsync(Guid id);
+            Task<IEnumerable<ChannelDto>> GetAllChannelsAsync();
+             Task<IEnumerable<ChannelDto>> GetChannelsForUserAsync(Guid userId);
+            Task<bool> UpdateChannelAsync(Guid id, ChannelUpdateDto dto, Guid ownerId);
+             Task<ChannelDto?> SearchByPublicIdAsync(int publicId);
+            Task<IEnumerable<ChannelDto>> SearchChannelsByTags(IEnumerable<string> tags);
+            Task<bool> DeleteChannelAsync(Guid id, Guid ownerId);
     }
 }
