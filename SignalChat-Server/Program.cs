@@ -58,7 +58,7 @@ namespace SignalChat_Server
 
             builder.Services.AddSwaggerGen(options =>
             {
-                options.CustomSchemaIds(x => x.FullName);
+                options.CustomSchemaIds(type => type.Name);
                 options.OrderActionsBy((apiDesc) => apiDesc.GroupName);
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -92,10 +92,7 @@ namespace SignalChat_Server
             {
                 app.MapOpenApi();
                 app.UseSwagger();
-                app.UseSwaggerUI(opt =>
-                {
-                    opt.SwaggerEndpoint("/openapi/v1.json", "v1");
-                });
+                app.UseSwaggerUI();
                 
             }
             app.UseHttpsRedirection();

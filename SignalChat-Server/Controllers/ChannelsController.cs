@@ -15,7 +15,6 @@ namespace SignalChat_Server.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("api/[controller]")]
-//    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ChannelsController : ControllerBase
     {
         private readonly IChannelService _service;
