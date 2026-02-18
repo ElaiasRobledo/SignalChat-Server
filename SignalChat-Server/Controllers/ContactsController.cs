@@ -90,7 +90,7 @@ namespace SignalChat_Server.Controllers
         public async Task<IActionResult> GetSent()
         {
             if (_currentUserService.UserId == Guid.Empty) return Unauthorized();
-            var response = await _contactsService.IncomingPendingAsync(_currentUserService.UserId);
+            var response = await _contactsService.OutgoingPendingAsync(_currentUserService.UserId);
             return Ok(response);
         }
         [HttpDelete("{id}")]
