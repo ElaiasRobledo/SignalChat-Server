@@ -1,14 +1,15 @@
 ﻿using Application.Common.Interfaces.Contacts;
 using Application.Common.Interfaces.Utils;
 using Application.DTOs.Contacts;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SignalChat_Server.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class ContactsController : ControllerBase
     {
         private readonly ILogger<ContactsController> _logger;

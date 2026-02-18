@@ -7,9 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SignalChat_Server.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     public class UsersController : ControllerBase
     {
