@@ -23,6 +23,12 @@ namespace Infrastructure
             modelBuilder.Entity<ChannelMember>()
                 .HasKey(cm => new { cm.ChannelId, cm.UserId });
 
+            modelBuilder.Entity<ChannelMember>()
+                .HasOne(cm => cm.Member)
+                .WithMany()
+                .HasForeignKey(cm => cm.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<RequestToJoinToChannel>()
                 .HasKey(req => new { req.RequesterId, req.ChannelId });
 
@@ -46,7 +52,6 @@ namespace Infrastructure
                 .HasOne(ct => ct.Tag)
                 .WithMany(t => t.Channels)
                 .HasForeignKey(ct => ct.TagId);
-
 
             modelBuilder.Entity<Tag>()
                 .HasIndex(t => t.NormalizedName)
