@@ -8,7 +8,7 @@ namespace Application.Common.Interfaces.Users
 {
     public interface IUserService
     {
-        Task<string> GetUsername(string id);
+        Task<string> GetUsernameAsync(string id);
         Task<User> GetByIdAsync(string id);
         Task<ResponseContactDto> GetByUsernameAsync(string userName);
         Task<IEnumerable<ResponseContactDto>> GetAllAsync(Guid ownerId,string username);

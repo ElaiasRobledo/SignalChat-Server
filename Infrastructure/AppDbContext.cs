@@ -26,6 +26,12 @@ namespace Infrastructure
             modelBuilder.Entity<RequestToJoinToChannel>()
                 .HasKey(req => new { req.RequesterId, req.ChannelId });
 
+            modelBuilder.Entity<RequestToJoinToChannel>()
+                .HasOne(r => r.Requester)
+                .WithMany()
+                .HasForeignKey(r => r.RequesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Contact>()
                 .HasKey(cm => new { cm.RequesterId, cm.AddresseeId });
             modelBuilder.Entity<ChannelTag>()

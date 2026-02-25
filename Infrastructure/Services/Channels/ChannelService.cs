@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces.Channels;
+using Application.Common.Interfaces.Users;
 using Application.DTOs.Channels;
 using Application.Exceptions.Channels;
 using Domain.Entities;
@@ -18,11 +19,13 @@ namespace Infrastructure.Services.Channels
     {
         private readonly AppDbContext _db;
         private readonly ILogger<ChannelService> _logger;
+        private readonly IUserService _userService;
 
-        public ChannelService(AppDbContext db, ILogger<ChannelService> logger)
+        public ChannelService(AppDbContext db, ILogger<ChannelService> logger, IUserService userService)
         {
             _db = db;
             _logger = logger;
+            _userService = userService;
         }
 
         public async Task<ChannelDto> CreateChannelAsync(ChannelCreateDto dto, Guid ownerId)
@@ -84,7 +87,21 @@ namespace Infrastructure.Services.Channels
 
             return list;
         }
+        public async Task<IEnumerable<IncomingRequestsDto>> IncomingRequestsAsync(Guid channelId, Guid ownerId)
+        {
+            var result = await _db.RequestToJoinToChannels
+                .Where(r => r.ChannelId == channelId)
+                .Select(r => new IncomingRequestsDto
+                {
+                    Username = r.Requester.Username,
+                    Reason = r.Reason,
+                    Id = r.RequesterId.ToString(),
+                    Date = r.SentAt
+                })
+                .ToListAsync();
 
+            return result;
+        }
         public async Task<bool> UpdateChannelAsync(Guid id, ChannelUpdateDto dto,
             Guid ownerId)
         {
@@ -141,7 +158,7 @@ namespace Infrastructure.Services.Channels
         {
             var channel = await _db.Channels
                 .Where(c => c.Name.StartsWith(channelName)
-                && c.IsVisible)
+                && c.IsVisible && c.IsPublicName)
                 .ToListAsync();
             return channel.Adapt<IEnumerable<ChannelDto>>();
         }
@@ -149,7 +166,10 @@ namespace Infrastructure.Services.Channels
         public async Task<ChannelDto?> SearchByPublicIdAsync(int publicId)
         {
             var entity = await _db.Channels
-                .FirstOrDefaultAsync(c => c.PublicId == publicId);
+                .Where(c => c.PublicId.ToString()
+                .StartsWith(publicId.ToString())
+                && c.IsVisible && !c.IsPublicName)
+                .ToListAsync();
 
             return entity == null ? null : entity.Adapt<ChannelDto>();
         }

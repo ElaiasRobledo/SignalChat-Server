@@ -44,7 +44,7 @@ namespace Infrastructure.Services.ChannelMembers
             await _appDbContext.SaveChangesAsync();
 
         }
-        public async Task SendRequestToJoinToPrivateChannel(Guid userId, Guid channelId)
+        public async Task SendRequestToJoinToPrivateChannel(Guid userId, Guid channelId, string reason)
         {
             var channel = await _appDbContext.Channels.FirstOrDefaultAsync
                 (c => c.Id == channelId);
@@ -55,7 +55,7 @@ namespace Infrastructure.Services.ChannelMembers
 
             if (requestSent) throw new SentRequestToJoinToChannelException();
 
-            var newRequest = new RequestToJoinToChannel(userId, channelId);
+            var newRequest = new RequestToJoinToChannel(userId, channelId, reason);
             _logger.LogInformation($"Creating request for: {userId.ToString()} to channel: {channelId.ToString()}");
 
             await _appDbContext.RequestToJoinToChannels.AddAsync(newRequest);

@@ -18,7 +18,7 @@ namespace Infrastructure.Services.Users
             _appDbContext = appDbContext;
         }
 
-        public async Task<string> GetUsername(string id)
+        public async Task<string> GetUsernameAsync(string id)
         {
             var result = await _appDbContext.Users.FirstOrDefaultAsync
                 (u => u.Id.ToString() == id);

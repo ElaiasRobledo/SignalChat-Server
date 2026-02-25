@@ -32,7 +32,7 @@ namespace Infrastructure.Services.Contacts
         public async Task<AddContactResult> AddAsync(Guid ownerId, string userName)
         {
             var targetUser = await _usersService.GetByUsernameAsync(userName);
-            var ownUsername = await _usersService.GetUsername(ownerId.ToString());
+            var ownUsername = await _usersService.GetUsernameAsync(ownerId.ToString());
 
             var existing = await _appDbContext.Contacts
             .FirstOrDefaultAsync(c =>
