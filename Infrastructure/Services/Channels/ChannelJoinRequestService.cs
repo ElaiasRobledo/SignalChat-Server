@@ -28,6 +28,12 @@ namespace Infrastructure.Services.Channels
 
         public async Task<IEnumerable<IncomingRequestsDto>> IncomingRequestsAsync(Guid channelId, Guid ownerId)
         {
+            var channel = await _appDbContext.Channels.FirstOrDefaultAsync
+                (c => c.Id == channelId);
+            if (channel is null) throw new ChannelNotFoundException();
+
+            if (channel.OwnerId != ownerId) throw new MemberNotAuthorizedException();
+
             var result = await _appDbContext.RequestToJoinToChannels
                 .Where(r => r.ChannelId == channelId)
                 .Select(r => new IncomingRequestsDto
