@@ -28,6 +28,7 @@ namespace Infrastructure
             services.AddScoped<IChannelService, ChannelService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IContactsService, ContactsService>();
+            services.AddScoped<IChannelJoinRequest, ChannelJoinRequestService>();
             return services;
         }
     }

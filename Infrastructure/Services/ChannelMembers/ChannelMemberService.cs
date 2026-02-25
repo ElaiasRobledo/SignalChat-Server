@@ -44,24 +44,7 @@ namespace Infrastructure.Services.ChannelMembers
             await _appDbContext.SaveChangesAsync();
 
         }
-        public async Task SendRequestToJoinToPrivateChannel(Guid userId, Guid channelId, string reason)
-        {
-            var channel = await _appDbContext.Channels.FirstOrDefaultAsync
-                (c => c.Id == channelId);
-            if (channel is null) throw new ChannelNotFoundException();
-           
-            var requestSent = await _appDbContext.RequestToJoinToChannels.AnyAsync
-              (u => u.RequesterId == userId && u.ChannelId == channelId);
-
-            if (requestSent) throw new SentRequestToJoinToChannelException();
-
-            var newRequest = new RequestToJoinToChannel(userId, channelId, reason);
-            _logger.LogInformation($"Creating request for: {userId.ToString()} to channel: {channelId.ToString()}");
-
-            await _appDbContext.RequestToJoinToChannels.AddAsync(newRequest);
-            await _appDbContext.SaveChangesAsync();
-
-        }
+    
         public async Task<IEnumerable<GetChannelsMembersDto>> GetChannelsForUserAsync(Guid userId)
         {
 

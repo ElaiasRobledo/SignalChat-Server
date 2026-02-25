@@ -9,6 +9,5 @@ namespace Application.Common.Interfaces.ChannelMembers
     {
         Task JoinToChannel(Guid userId, Guid channelId);
         Task<IEnumerable<GetChannelsMembersDto>> GetChannelsForUserAsync(Guid userId);
-        Task SendRequestToJoinToPrivateChannel(Guid userId, Guid channelId, string reason);
     }
 }

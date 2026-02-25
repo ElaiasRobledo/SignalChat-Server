@@ -44,5 +44,10 @@ namespace Application.DTOs.Channels
         public string Reason { get; set; }
         public DateTime Date { get; set; }
     }
-
+    public record MembersOfAChannelDto
+    {
+        public string Id { get; set; }
+        public string Username { get; set; }
+        public string Role {  get; set; }
+    }
 }

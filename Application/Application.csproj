@@ -7,12 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain\Domain.csproj" />
+    <Compile Remove="CQRS\**" />
+    <EmbeddedResource Remove="CQRS\**" />
+    <None Remove="CQRS\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\Commands\Users\" />
-    <Folder Include="CQRS\Queries\" />
+    <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
 </Project>

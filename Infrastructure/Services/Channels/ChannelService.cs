@@ -19,13 +19,11 @@ namespace Infrastructure.Services.Channels
     {
         private readonly AppDbContext _db;
         private readonly ILogger<ChannelService> _logger;
-        private readonly IUserService _userService;
 
-        public ChannelService(AppDbContext db, ILogger<ChannelService> logger, IUserService userService)
+        public ChannelService(AppDbContext db, ILogger<ChannelService> logger)
         {
             _db = db;
             _logger = logger;
-            _userService = userService;
         }
 
         public async Task<ChannelDto> CreateChannelAsync(ChannelCreateDto dto, Guid ownerId)
@@ -87,21 +85,22 @@ namespace Infrastructure.Services.Channels
 
             return list;
         }
-        public async Task<IEnumerable<IncomingRequestsDto>> IncomingRequestsAsync(Guid channelId, Guid ownerId)
+        public async Task<IEnumerable<MembersOfAChannelDto>> GetMembersAsync(Guid channelId)
         {
-            var result = await _db.RequestToJoinToChannels
-                .Where(r => r.ChannelId == channelId)
-                .Select(r => new IncomingRequestsDto
+            var list = await _db.ChannelMembers.Where(c => c.ChannelId == channelId)
+                .Select
+                (c => new MembersOfAChannelDto
                 {
-                    Username = r.Requester.Username,
-                    Reason = r.Reason,
-                    Id = r.RequesterId.ToString(),
-                    Date = r.SentAt
-                })
-                .ToListAsync();
+                    Id = c.UserId.ToString(),
+                    Role = c.Role.ToString(),
+                    Username = c.Member.Username
 
-            return result;
+                }).ToListAsync();
+
+            return list;
+
         }
+       
         public async Task<bool> UpdateChannelAsync(Guid id, ChannelUpdateDto dto,
             Guid ownerId)
         {
@@ -220,6 +219,8 @@ namespace Infrastructure.Services.Channels
             return existing.Concat(newTags).ToList();
         }
 
+        //TODO
+        //Create a middleware for handling public Id generation.
         private async Task<int> GeneratePublicIdAsync()
         {
             var random = new Random();
