@@ -2,6 +2,7 @@
 using Application.Common.Interfaces.Channels;
 using Application.Common.Interfaces.Utils;
 using Application.DTOs.Channels;
+using Application.Exceptions.ChannelMembers;
 using Application.Exceptions.Channels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -23,9 +24,10 @@ namespace SignalChat_Server.Controllers
         private readonly ILogger<ChannelsController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICurrentUserService _currentUserService;
-
+        private readonly IChannelJoinRequest _channelJoinRequest;
 
         public ChannelsController(IChannelService service,
+            IChannelJoinRequest channelJoinRequest,
             ILogger<ChannelsController> logger,
             IHubContext<ChatHub> hub,
             IHttpContextAccessor httpContextAccessor,
@@ -38,6 +40,7 @@ namespace SignalChat_Server.Controllers
             _channelMembers = channelMembers;
             _hub = hub;
             _httpContextAccessor = httpContextAccessor;
+            _channelJoinRequest = channelJoinRequest;
             _currentUserService = currentUserService;
         }
 
@@ -54,16 +57,16 @@ namespace SignalChat_Server.Controllers
             try
             {
 
-                var connectionId = Request.Headers["X-ConnectionId"].ToString();
-                if (string.IsNullOrEmpty(connectionId)) return BadRequest("Missing connectionId");
+                //var connectionId = Request.Headers["X-ConnectionId"].ToString();
+                //if (string.IsNullOrEmpty(connectionId)) return BadRequest("Missing connectionId");
 
                 var channel = await _service.GetChannelAsync(channelId);
                 if (channel is null) { NotFound("Channel has not been found it"); }
 
                 await _channelMembers.JoinToChannel(_currentUserService.UserId, channelId);
 
-                await _hub.Groups.AddToGroupAsync(connectionId, channelId.ToString());
-                await _hub.Clients.Groups(channelId.ToString()).SendAsync("ReceiveMessage", $"Welcome {User.Identity?.Name}");
+                //await _hub.Groups.AddToGroupAsync(connectionId, channelId.ToString());
+                //await _hub.Clients.Groups(channelId.ToString()).SendAsync("ReceiveMessage", $"Welcome {User.Identity?.Name}");
 
                 return Ok();
             }
@@ -99,12 +102,19 @@ namespace SignalChat_Server.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+       
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             bool ok = await _service.DeleteChannelAsync(id, _currentUserService.UserId);
             return ok ? NoContent() : NotFound();
+        }
+
+        [HttpGet("users/{id}")]
+        public async Task<IActionResult> GetMembers(Guid id)
+        {
+            var response = await _service.GetMembersAsync(id);
+            return Ok(response);
         }
     }
 }

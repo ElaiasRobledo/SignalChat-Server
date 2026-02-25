@@ -78,6 +78,7 @@ namespace Infrastructure.Services.Channels
                     Description = c.Description,
                     CreatedAt = c.CreatedAt,
                     IsPublic = c.IsPublic,
+                    PublicId = c.PublicId.ToString()
                 })
                 .ToListAsync();
 
@@ -87,6 +88,8 @@ namespace Infrastructure.Services.Channels
         }
         public async Task<IEnumerable<MembersOfAChannelDto>> GetMembersAsync(Guid channelId)
         {
+            //Validar y considerar el estado de un canal, si es privado nadie puede ver los miembros.
+
             var list = await _db.ChannelMembers.Where(c => c.ChannelId == channelId)
                 .Select
                 (c => new MembersOfAChannelDto

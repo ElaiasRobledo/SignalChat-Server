@@ -23,5 +23,6 @@ namespace Application.Common.Interfaces.Channels
 
         Task<bool> DeleteChannelAsync(Guid id, Guid ownerId);
 
+        Task<IEnumerable<MembersOfAChannelDto>> GetMembersAsync(Guid channelId);
     }
 }
