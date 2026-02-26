@@ -7,7 +7,7 @@ namespace Application.Common.Interfaces.Channels
 {
     public interface IChannelJoinRequest
     {
-        Task SendRequestToJoinToPrivateChannel(Guid userId, Guid channelId, string reason);
+        Task CreateJoinRequestAsync(Guid userId, Guid channelId, string reason);
         Task<IEnumerable<IncomingRequestsDto>> IncomingRequestsAsync(Guid channelId, Guid ownerId);
     }
 }

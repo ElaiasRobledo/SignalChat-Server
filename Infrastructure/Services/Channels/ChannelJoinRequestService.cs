@@ -16,7 +16,6 @@ namespace Infrastructure.Services.Channels
         private readonly AppDbContext _appDbContext;
         private readonly IChannelService _channelService;
         private readonly ILogger<ChannelJoinRequestService> _logger;
-        
         public ChannelJoinRequestService(AppDbContext appDbContext, IChannelService channelService,
             ILogger<ChannelJoinRequestService> logger)
         {
@@ -46,7 +45,8 @@ namespace Infrastructure.Services.Channels
 
             return result;
         }
-        public async Task SendRequestToJoinToPrivateChannel(Guid userId, Guid channelId, string reason)
+        //Change the name to CreateJoinRequest
+        public async Task CreateJoinRequestAsync(Guid userId, Guid channelId, string reason)
         {
             var channel = await _appDbContext.Channels.FirstOrDefaultAsync
                 (c => c.Id == channelId);
@@ -55,6 +55,8 @@ namespace Infrastructure.Services.Channels
             var requestSent = await _appDbContext.RequestToJoinToChannels.AnyAsync
               (u => u.RequesterId == userId && u.ChannelId == channelId);
 
+            if (channel.OwnerId == userId) throw new OwnerSendJoinRequestException();
+
             if (requestSent) throw new SentRequestToJoinToChannelException();
 
             var newRequest = new RequestToJoinToChannel(userId, channelId, reason);
@@ -62,6 +64,20 @@ namespace Infrastructure.Services.Channels
 
             await _appDbContext.RequestToJoinToChannels.AddAsync(newRequest);
             await _appDbContext.SaveChangesAsync();
+
+        }
+        public async Task ApproveAsync(Guid channelId,Guid requesterId, Guid ownerId)
+        {
+            var request = await _appDbContext.RequestToJoinToChannels
+                .FirstOrDefaultAsync(c => c.RequesterId == requesterId &&
+                c.ChannelId == channelId &&
+                c.status == RequestToJoinToChannel.Status.Pending);
+
+            if(request is null) throw new KeyNotFoundException();
+
+            request.Accept();
+            await _appDbContext.SaveChangesAsync ();
+
 
         }
     }

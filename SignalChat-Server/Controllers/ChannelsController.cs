@@ -15,33 +15,31 @@ namespace SignalChat_Server.Controllers
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/channels")]
     public class ChannelsController : ControllerBase
     {
         private readonly IChannelService _service;
         private readonly IHubContext<ChatHub> _hub;
         private readonly IChannelMember _channelMembers;
+
         private readonly ILogger<ChannelsController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IChannelJoinRequest _channelJoinRequest;
 
         public ChannelsController(IChannelService service,
-            IChannelJoinRequest channelJoinRequest,
             ILogger<ChannelsController> logger,
             IHubContext<ChatHub> hub,
-            IHttpContextAccessor httpContextAccessor,
             IChannelMember channelMembers,
+            IHttpContextAccessor httpContextAccessor,
             ICurrentUserService currentUserService
             )
         {
             _service = service;
             _logger = logger;
-            _channelMembers = channelMembers;
             _hub = hub;
             _httpContextAccessor = httpContextAccessor;
-            _channelJoinRequest = channelJoinRequest;
             _currentUserService = currentUserService;
+            _channelMembers = channelMembers;
         }
 
         [HttpPost]
@@ -56,7 +54,6 @@ namespace SignalChat_Server.Controllers
         {
             try
             {
-
                 //var connectionId = Request.Headers["X-ConnectionId"].ToString();
                 //if (string.IsNullOrEmpty(connectionId)) return BadRequest("Missing connectionId");
 
@@ -75,7 +72,7 @@ namespace SignalChat_Server.Controllers
                 return Conflict(ex.Message);
             }
         }
-       
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
@@ -97,24 +94,17 @@ namespace SignalChat_Server.Controllers
                 bool ok = await _service.UpdateChannelAsync(id, dto, _currentUserService.UserId);
                 return ok ? NoContent() : NotFound();
             }
-            catch(MemberNotAuthorizedException ex) 
-            { 
+            catch (MemberNotAuthorizedException ex)
+            {
                 return BadRequest(ex.Message);
             }
         }
-       
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             bool ok = await _service.DeleteChannelAsync(id, _currentUserService.UserId);
             return ok ? NoContent() : NotFound();
-        }
-
-        [HttpGet("users/{id}")]
-        public async Task<IActionResult> GetMembers(Guid id)
-        {
-            var response = await _service.GetMembersAsync(id);
-            return Ok(response);
         }
     }
 }

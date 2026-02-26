@@ -15,4 +15,8 @@ namespace Application.Exceptions.ChannelMembers
     {
         public SentRequestToJoinToChannelException() : base("The request has already been sent") { }
     }
+    public sealed class OwnerSendJoinRequestException : Exception
+    {
+        public OwnerSendJoinRequestException() : base("You cannot send a request because you're thw owner") { }
+    }
 }

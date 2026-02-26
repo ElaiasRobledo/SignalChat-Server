@@ -86,23 +86,7 @@ namespace Infrastructure.Services.Channels
 
             return list;
         }
-        public async Task<IEnumerable<MembersOfAChannelDto>> GetMembersAsync(Guid channelId)
-        {
-            //Validar y considerar el estado de un canal, si es privado nadie puede ver los miembros.
-
-            var list = await _db.ChannelMembers.Where(c => c.ChannelId == channelId)
-                .Select
-                (c => new MembersOfAChannelDto
-                {
-                    Id = c.UserId.ToString(),
-                    Role = c.Role.ToString(),
-                    Username = c.Member.Username
-
-                }).ToListAsync();
-
-            return list;
-
-        }
+      
        
         public async Task<bool> UpdateChannelAsync(Guid id, ChannelUpdateDto dto,
             Guid ownerId)

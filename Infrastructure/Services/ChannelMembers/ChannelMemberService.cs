@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces.ChannelMembers;
 using Application.DTOs.ChannelMembers;
+using Application.DTOs.Channels;
 using Application.Exceptions.ChannelMembers;
 using Application.Exceptions.Channels;
 using Domain.Entities;
@@ -34,7 +35,7 @@ namespace Infrastructure.Services.ChannelMembers
 
             if(!channel.IsPublic) throw new ChannelIsPrivateException();
 
-            if (userInGroup) throw new UserIsAlreadyInTheChannelException();
+            if (userInGroup || channel.OwnerId == userId) throw new UserIsAlreadyInTheChannelException();
 
             var newUser = new ChannelMember(channelId,userId,ChannelMember.ChannelRole.Member);
             
@@ -50,6 +51,24 @@ namespace Infrastructure.Services.ChannelMembers
 
             var entities = await _appDbContext.ChannelMembers.Where(c => c.UserId == userId).ToListAsync();
             return entities.Adapt<IEnumerable<GetChannelsMembersDto>>();
+        }
+
+        public async Task<IEnumerable<MembersOfAChannelDto>> GetMembersAsync(Guid channelId)
+        {
+            //Validar y considerar el estado de un canal, si es privado nadie puede ver los miembros.
+
+            var list = await _appDbContext.ChannelMembers.Where(c => c.ChannelId == channelId)
+                .Select
+                (c => new MembersOfAChannelDto
+                {
+                    Id = c.UserId.ToString(),
+                    Role = c.Role.ToString(),
+                    Username = c.Member.Username
+
+                }).ToListAsync();
+
+            return list;
+
         }
     }
 }
