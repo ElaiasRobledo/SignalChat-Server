@@ -9,5 +9,7 @@ namespace Application.Common.Interfaces.Channels
     {
         Task CreateJoinRequestAsync(Guid userId, Guid channelId, string reason);
         Task<IEnumerable<IncomingRequestsDto>> IncomingRequestsAsync(Guid channelId, Guid ownerId);
+        Task RejectAsync(Guid channelId, Guid requesterId, Guid OwnerId);
+        Task ApproveAsync(Guid channelId, Guid requesterId, Guid OwnerId);
     }
 }

@@ -19,4 +19,8 @@ namespace Application.Exceptions.ChannelMembers
     {
         public OwnerSendJoinRequestException() : base("You cannot send a request because you're thw owner") { }
     }
+    public sealed class SendJoinRequestToPublicChannelException : Exception
+    {
+        public SendJoinRequestToPublicChannelException() : base("You cannot send a request because the channel is public") {}
+    }
 }

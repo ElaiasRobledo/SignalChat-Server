@@ -18,10 +18,12 @@ namespace Application.Common.Interfaces.Channels
         Task<bool> UpdateChannelAsync(Guid id, ChannelUpdateDto dto, Guid ownerId);
 
         Task<ChannelDto?> SearchByPublicIdAsync(int publicId);
+        Task<IEnumerable<ChannelDto?>> SearchByNameAsync(string channelName);
 
         Task<IEnumerable<ChannelDto>> SearchChannelsByTags(IEnumerable<string> tags);
 
         Task<bool> DeleteChannelAsync(Guid id, Guid ownerId);
+        Task ExitFromAGroupAsync (Guid channelId, Guid userId);
 
     }
 }

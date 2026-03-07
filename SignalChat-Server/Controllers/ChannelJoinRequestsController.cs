@@ -82,5 +82,22 @@ namespace SignalChat_Server.Controllers
             return Created();
         }
 
+        //Add catching errors and expection and return better responses.
+ 
+        [HttpPost("approve/{userId}")]
+        public async Task<IActionResult> ApproveRequest ([FromRoute] Guid channelId, [FromRoute] Guid userId)
+        {
+            await _channelJoinRequests.ApproveAsync(channelId, userId, _currentUser.UserId);
+            return Ok("User approved successfully");
+
+        }
+        [HttpPut("reject/{userId}")]
+        public async Task<IActionResult> RejectRequest ([FromRoute] Guid channelId, [FromRoute] Guid userId)
+        {
+            await _channelJoinRequests.RejectAsync(channelId, userId, _currentUser.UserId);
+            return Ok("User rejected successfully");
+
+        }
+
     }
 }
