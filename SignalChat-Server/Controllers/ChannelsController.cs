@@ -99,12 +99,32 @@ namespace SignalChat_Server.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("search/name")]
+        public async Task<ActionResult> GetChannelByName([FromQuery] string name)
+        {
+            var result = await _service.SearchByNameAsync(name);
+            return result.Any() ? Ok(result) : NotFound("Channel not found");
+        }
+         [HttpGet("search/publicId")]
+        public async Task<ActionResult> GetChannelByPublicId([FromQuery] int publicId)
+        {
+            var result = await _service.SearchByPublicIdAsync(publicId);
+            return result != null ? Ok(result) : NotFound("Channel not found");
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             bool ok = await _service.DeleteChannelAsync(id, _currentUserService.UserId);
             return ok ? NoContent() : NotFound();
+        }
+        [HttpDelete("exit/{id}")]
+        public async Task<IActionResult> ExitFromAChannel([FromRoute] Guid id)
+        {
+           
+           await _service.ExitFromAGroupAsync(id, _currentUserService.UserId);
+           return Ok("You have exited from the channel successfully");
+
         }
     }
 }

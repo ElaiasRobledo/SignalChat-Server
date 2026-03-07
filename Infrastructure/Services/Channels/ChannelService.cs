@@ -146,6 +146,7 @@ namespace Infrastructure.Services.Channels
                 .Where(c => c.Name.StartsWith(channelName)
                 && c.IsVisible && c.IsPublicName)
                 .ToListAsync();
+
             return channel.Adapt<IEnumerable<ChannelDto>>();
         }
 
@@ -155,11 +156,24 @@ namespace Infrastructure.Services.Channels
                 .Where(c => c.PublicId.ToString()
                 .StartsWith(publicId.ToString())
                 && c.IsVisible && !c.IsPublicName)
-                .ToListAsync();
+                .FirstOrDefaultAsync();
 
-            return entity == null ? null : entity.Adapt<ChannelDto>();
+            return  entity.Adapt<ChannelDto>();
         }
 
+        public async Task ExitFromAGroupAsync (Guid channelId, Guid userId)
+        {
+        
+            
+            var entity = await _db.ChannelMembers.FirstOrDefaultAsync(c =>c.ChannelId == channelId && c.UserId == userId);
+
+            if (entity == null) throw new KeyNotFoundException("Entity not found");
+            
+            _db.ChannelMembers.Remove(entity);
+            await _db.SaveChangesAsync();
+            _logger.LogInformation("User: {userId} have exited the channel {channelId}", userId,channelId);
+
+        }
         public async Task<bool> DeleteChannelAsync(Guid id, Guid ownerId)
         {
             var entity = await _db.Channels.FirstOrDefaultAsync(c => c.Id == id);
