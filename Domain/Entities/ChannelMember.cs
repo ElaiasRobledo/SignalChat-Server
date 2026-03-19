@@ -15,6 +15,8 @@ namespace Domain.Entities
         private ChannelMember() { }
 
         public User Member { get; private set; }
+        public Channel Channel { get; private set; }
+        
 
         public ChannelMember(Guid channelId, Guid userId, ChannelRole role)
         {
