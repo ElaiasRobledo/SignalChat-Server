@@ -31,8 +31,14 @@ namespace SignalChat_Server.Hubs
         public async Task SendMessageToSpecificClient(string targetUserId, string message)
         => await Clients.User(targetUserId).SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
 
-        public async Task SendMessageToGroup(Guid channelId,string message)
-        => await Clients.Group(channelId.ToString()).SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
+        public async Task SendMessageToGroup(string channelId,string message)
+        {
+            Console.WriteLine($"ID: {channelId} MSG: {message}");
+            var userId = Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+          await Clients.Group(channelId.ToString()).SendAsync("ReceiveGroupMessages",channelId, userId ,Context.User.Identity.Name, message);
+          
+        } 
+
 
         public async Task WelcomeMessageToGroup(string connectionId, Guid channelId)
         {

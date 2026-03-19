@@ -80,10 +80,13 @@ namespace SignalChat_Server.Controllers
             return channel is null ? NotFound() : Ok(channel);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("mychannels")]
+        public async Task<IActionResult> GetMyChannels()
         {
-            return Ok(await _service.GetAllChannelsAsync());
+            
+            var channels = await _service.GetMyChannelsAsync(_currentUserService.UserId);
+            return Ok(channels);
+
         }
 
         [HttpPut("{id}")]

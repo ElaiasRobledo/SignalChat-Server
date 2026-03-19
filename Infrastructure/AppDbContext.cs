@@ -21,13 +21,20 @@ namespace Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ChannelMember>()
-                .HasKey(cm => new { cm.ChannelId, cm.UserId });
+            .HasKey(cm => new { cm.ChannelId, cm.UserId });
 
             modelBuilder.Entity<ChannelMember>()
                 .HasOne(cm => cm.Member)
-                .WithMany()
+                .WithMany(u => u.Channels)
                 .HasForeignKey(cm => cm.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ChannelMember>()
+                .HasOne(cm => cm.Channel)
+                .WithMany(c => c.Members)
+                .HasForeignKey(cm => cm.ChannelId);
+
+
 
             modelBuilder.Entity<RequestToJoinToChannel>()
                 .HasKey(req => new { req.RequesterId, req.ChannelId });

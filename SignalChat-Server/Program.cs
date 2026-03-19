@@ -90,12 +90,14 @@ namespace SignalChat_Server
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                app.UseHttpsRedirection();
+                app.UseHsts();
                 app.MapOpenApi();
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                
+
+                               
             }
-            app.UseHttpsRedirection();
 
             app.UseAuthentication();
             app.UseAuthorization();

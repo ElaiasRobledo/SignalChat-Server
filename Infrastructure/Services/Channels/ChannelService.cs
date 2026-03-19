@@ -86,6 +86,25 @@ namespace Infrastructure.Services.Channels
 
             return list;
         }
+
+        public async Task<IEnumerable<ChannelDto>> GetMyChannelsAsync(Guid userId)
+        {
+            var list = await _db.ChannelMembers.Where(c => c.UserId == userId)
+            .Select(c => new ChannelDto
+            {
+                Id = c.Channel.Id,
+                Name = c.Channel.Name,
+                Description = c.Channel.Description,
+                CreatedAt = c.Channel.CreatedAt,
+                TotalMembers = c.Channel.Members.Count,
+
+                
+            }).ToListAsync();
+
+             _logger.LogInformation("Channels retrieved: {Count}", list.Count);
+             return list;
+
+        }
       
        
         public async Task<bool> UpdateChannelAsync(Guid id, ChannelUpdateDto dto,
