@@ -54,16 +54,16 @@ namespace SignalChat_Server.Controllers
         {
             try
             {
-                //var connectionId = Request.Headers["X-ConnectionId"].ToString();
-                //if (string.IsNullOrEmpty(connectionId)) return BadRequest("Missing connectionId");
+                var connectionId = Request.Headers["X-ConnectionId"].ToString();
+                if (string.IsNullOrEmpty(connectionId)) return BadRequest("Missing connectionId");
 
                 var channel = await _service.GetChannelAsync(channelId);
                 if (channel is null) { NotFound("Channel has not been found it"); }
 
                 await _channelMembers.JoinToChannel(_currentUserService.UserId, channelId);
 
-                //await _hub.Groups.AddToGroupAsync(connectionId, channelId.ToString());
-                //await _hub.Clients.Groups(channelId.ToString()).SendAsync("ReceiveMessage", $"Welcome {User.Identity?.Name}");
+                await _hub.Groups.AddToGroupAsync(connectionId, channelId.ToString());
+                await _hub.Clients.Groups(channelId.ToString()).SendAsync("ReceiveMessage", $"Welcome {User.Identity?.Name}");
 
                 return Ok();
             }
@@ -106,7 +106,7 @@ namespace SignalChat_Server.Controllers
         public async Task<ActionResult> GetChannelByName([FromQuery] string name)
         {
             var result = await _service.SearchByNameAsync(name);
-            return result.Any() ? Ok(result) : NotFound("Channel not found");
+            return Ok(result);
         }
          [HttpGet("search/publicId")]
         public async Task<ActionResult> GetChannelByPublicId([FromQuery] int publicId)
