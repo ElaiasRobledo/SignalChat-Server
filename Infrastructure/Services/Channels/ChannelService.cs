@@ -53,10 +53,22 @@ namespace Infrastructure.Services.Channels
             return entity.Adapt<ChannelDto>();
         }
 
-        public async Task<ChannelDto> GetChannelAsync(Guid id)
+        public async Task<ChannelDto?> GetChannelAsync(Guid id)
         {
             var entity = await _db.Channels
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .Where(c => c.Id == id)
+                .Select(c => new ChannelDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    CreatedAt = c.CreatedAt,
+                    IsPublic = c.IsPublic,
+                    PublicId = c.PublicId.ToString(),
+                    Tags = c.Tags.Select(t => t.Tag.Name).ToList(),
+                    TotalMembers = c.Members.Count()
+                })
+                .FirstOrDefaultAsync();
 
             if (entity == null)
             {
@@ -64,9 +76,8 @@ namespace Infrastructure.Services.Channels
                 return null;
             }
 
-            return entity.Adapt<ChannelDto>();
+            return entity;
         }
-
         public async Task<IEnumerable<ChannelDto>> GetAllChannelsAsync()
         {
             var list = await _db.Channels
@@ -78,6 +89,7 @@ namespace Infrastructure.Services.Channels
                     Description = c.Description,
                     CreatedAt = c.CreatedAt,
                     IsPublic = c.IsPublic,
+                    Tags = c.Tags.Select(t => t.Tag.Name).ToList(),
                     PublicId = c.PublicId.ToString()
                 })
                 .ToListAsync();
@@ -97,7 +109,7 @@ namespace Infrastructure.Services.Channels
                 Description = c.Channel.Description,
                 CreatedAt = c.Channel.CreatedAt,
                 TotalMembers = c.Channel.Members.Count,
-
+                Tags = c.Channel.Tags.Select(t => t.Tag.Name).ToList(),
                 
             }).ToListAsync();
 

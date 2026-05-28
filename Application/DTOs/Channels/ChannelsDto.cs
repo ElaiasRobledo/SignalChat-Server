@@ -35,7 +35,7 @@ namespace Application.DTOs.Channels
         public string PublicId { get; set; }
         public bool IsPublic { get; set; }
         public int TotalMembers { get; set; }
-
+        public List<string> Tags { get; set; }
         public DateTime CreatedAt { get; set; }
     }
     public record MembersOfAChannelDto
